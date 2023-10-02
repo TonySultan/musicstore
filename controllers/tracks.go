@@ -36,3 +36,41 @@ func CreateTrack(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{"tracks": track})
 }
+func GetTrack(context *gin.Context) {
+	var track models.Track
+	if err := models.ConnectDB().Where("id = ?", context.Param("id")).First(&track).Error; err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"tracks": track})
+}
+
+func UpdateTrack(context *gin.Context) {
+	var track models.Track
+	if err := models.ConnectDB().Where("id = ?", context.Param("id")).First(&track).Error; err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		return
+	}
+
+	var input UpdateTrackInput
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	models.ConnectDB().Model(&track).Update(input)
+
+	context.JSON(http.StatusOK, gin.H{"tracks": track})
+}
+func DeleteTrack(context *gin.Context) {
+	var track models.Track
+	if err := models.ConnectDB().Where("id = ?", context.Param("id")).First(&track).Error; err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Запись не существует"})
+		return
+	}
+
+	models.ConnectDB().Delete(&track)
+
+	context.JSON(http.StatusOK, gin.H{"tracks": true})
+}
